@@ -1,0 +1,53 @@
+import random
+
+# Define the deck
+deck = list(range(1, 14))  # 1 = Ace, 13 = King
+
+def draw_card():
+    """Draw a random card from the deck."""
+    return random.choice(deck)
+
+def play_round(strategy_func):
+    """Play one round using the given strategy function."""
+    player_card = draw_card()
+    opponent_card = draw_card()
+    
+    # Player decides whether to "keep" or "redraw" based on their strategy
+    decision = strategy_func(player_card)
+    
+    if decision == "redraw":
+        player_card = draw_card()  # redraw once
+    
+    # Determine outcome
+    if player_card > opponent_card:
+        return 1  # win
+    elif player_card < opponent_card:
+        return -1  # lose
+    else:
+        return 0  # draw
+
+def always_keep_strategy(card):
+    """Simple strategy: always keep the first card."""
+    return "keep"
+
+def redraw_if_low_strategy(card, threshold=7):
+    """Redraw if card is below threshold."""
+    return "redraw" if card < threshold else "keep"
+
+def simulate(strategy_func, rounds=10000):
+    results = [play_round(strategy_func) for _ in range(rounds)]
+    wins = results.count(1)
+    losses = results.count(-1)
+    draws = results.count(0)
+    win_rate = wins / rounds
+    return {"win_rate": win_rate, "loss_rate": losses / rounds, "draw_rate": draws / rounds}
+
+# Compare strategies
+strategies = {
+    "Always Keep": always_keep_strategy,
+    "Redraw if Low": lambda c: redraw_if_low_strategy(c, 7),
+}
+
+for name, strat in strategies.items():
+    results = simulate(strat)
+    print(f"{name}: {results}")
